@@ -1,5 +1,9 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import "./App.css"
+
+// components
+import DrumPad from "./components/DrumPad"
+import Controls from "./components/Controls"
 
 const bankOne = [
   {
@@ -115,141 +119,30 @@ const bankTwo = [
   }
 ]
 
-const activeStyle = {
-  backgroundColor: "orange",
-  boxShadow: "0 3px orange",
-  height: 77,
-  marginTop: 13
-}
-
-const inactiveStyle = {
-  backgroundColor: "grey",
-  marginTop: 10,
-  boxShadow: "3px 3px 5px black"
-}
-
 function App() {
-  const [padStyle, setPadStyle] = useState(inactiveStyle)
+  const [power, setPower] = useState(true)
   const [currentPadBank, setCurrentPadBank] = useState(bankOne)
-  const [sliderVal, setSliderVal] = useState(0.3)
   const [display, setDisplay] = useState(String.fromCharCode(160))
 
-  console.log(currentPadBank)
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyPress)
-
-    // returned function will be called on component unmount
-    return () => {
-      document.removeEventListener("keydown", handleKeyPress)
-    }
-  }, [])
-
-  function handleKeyPress(e) {
-    const selectedAudio = document.getElementById(e.key.toUpperCase())
-    const selectedAudioName = document.getElementById("e.keyCode")
-    if (selectedAudio) {
-      selectedAudio.currentTime = 0
-      selectedAudio.play()
-      // setDisplay(e.target.id.replace(/-/g, " "))
-    }
-    console.log(e.keyCode)
-  }
-
-  // function activatePad() {
-  //   if (this.props.power) {
-  //     if (this.state.padStyle.backgroundColor === "orange") {
-  //       this.setState({
-  //         padStyle: inactiveStyle
-  //       })
-  //     } else {
-  //       this.setState({
-  //         padStyle: activeStyle
-  //       })
-  //     }
-  //   } else if (this.state.padStyle.marginTop === 13) {
-  //     this.setState({
-  //       padStyle: inactiveStyle
-  //     })
-  //   } else {
-  //     this.setState({
-  //       padStyle: {
-  //         height: 77,
-  //         marginTop: 13,
-  //         backgroundColor: "grey",
-  //         boxShadow: "0 3px grey"
-  //       }
-  //     })
-  //   }
-  // }
-
-  function playSound(e) {
-    const sound = e.target.firstElementChild
-    // console.log(e.target.id)
-    sound.currentTime = 0
-    sound.play()
-    // this.activatePad()
-    // setTimeout(() => this.activatePad(), 100)
-    setDisplay(e.target.id.replace(/-/g, " "))
-  }
-
+  // change audio bank
   function selectBank() {
     if (currentPadBank === bankOne) {
       setCurrentPadBank(bankTwo)
       setDisplay("Smooth Piano Kit")
-      // console.log(currentPadBank)
     } else {
       setCurrentPadBank(bankOne)
       setDisplay("Heater Kit")
     }
   }
 
-  function adjustVolume(e) {
-    // this.setState({
-    //   sliderVal: e.target.value,
-    //   display: 'Volume: ' + Math.round(e.target.value * 100)
-    // });
-    // setTimeout(() => this.clearDisplay(), 1000);
-    setSliderVal(e.target.value)
-    console.log(sliderVal)
-  }
-
-  const clips = [].slice.call(document.getElementsByClassName("clip"))
-  console.log(clips)
-  clips.forEach(sound => {
-    sound.volume = sliderVal
-  })
-
   return (
     <div className="inner-container" id="drum-machine">
       <div className="pad-bank">
-        {currentPadBank.map(x => {
-          return (
-            <div key={x.id} className="drum-pad" id={x.id} style={{ backgroundColor: "grey", marginTop: 10, boxShadow: "black 3px 3px 5px" }} onClick={playSound}>
-              <audio className="clip" id={x.keyTrigger} src={x.url} />
-              {x.keyTrigger}
-            </div>
-          )
-        })}
+        {currentPadBank.map(x => (
+          <DrumPad key={x.id} id={x.id} keyTrigger={x.keyTrigger} url={x.url} keyCode={x.keyCode} setDisplay={setDisplay} power={power} />
+        ))}
       </div>
-      <div className="controls-container">
-        <div className="control">
-          <p>Power</p>
-          <div className="select">
-            <div className="inner" style={{ float: "right" }}></div>
-          </div>
-        </div>
-        <p id="display">{display}</p>
-        <div className="volume-slider">
-          <input type="range" step="0.01" min="0" max="1" value={sliderVal} onChange={adjustVolume} />
-        </div>
-        <div className="control">
-          <p>Bank</p>
-          <div className="select" onClick={selectBank}>
-            <div className="inner" style={{ float: "left" }}></div>
-          </div>
-        </div>
-      </div>
+      <Controls display={display} setDisplay={setDisplay} selectBank={selectBank} currentPadBank={currentPadBank} power={power} setPower={setPower} />
     </div>
   )
 }
